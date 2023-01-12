@@ -32,7 +32,7 @@ function App() {
     <CustomTheme>
       <LocalizationProvider dateAdapter={AdapterDayjs} adapterLocale="itIT">
         <Container
-          maxWidth="xs"
+          maxWidth="sm"
           style={{
             backgroundColor: "white",
             padding: "32px 16px",

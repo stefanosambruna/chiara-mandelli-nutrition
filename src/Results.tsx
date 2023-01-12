@@ -4,6 +4,7 @@ import {
   Table,
   TableCell,
   TableRow,
+  TextField,
 } from "@mui/material";
 import React from "react";
 import { match } from "ts-pattern";
@@ -25,6 +26,8 @@ type Props = {
 };
 
 export function Results(props: Props) {
+  const [kcalDaTogliere, setKcalDaTogliere] = React.useState<number>(0);
+
   const rapportoVitaFianchi = props.input.waist / props.input.hip;
   const tagliaCorporea: TagliaCorporea = calcolaTagliaCorporea(
     props.input.wrist,
@@ -65,7 +68,7 @@ export function Results(props: Props) {
 
   const bodyType = calculateBodyType(props.input.gender, rapportoVitaFianchi);
 
-  const kcalDaTogliere = calcoloKcalDaTogliere(statoCorporeo);
+  const notaKcalDaTogliere = calcoloNotaKcalDaTogliere(statoCorporeo);
 
   const de = coefficienteLAF * metabolismoBasaleSchofild;
 
@@ -117,7 +120,9 @@ export function Results(props: Props) {
         )}
         <TableRow>
           <TableCell variant="head">Rapporto vita fianchi</TableCell>
-          <TableCell align="right">{cutDecimals(rapportoVitaFianchi)}</TableCell>
+          <TableCell align="right">
+            {cutDecimals(rapportoVitaFianchi)}
+          </TableCell>
         </TableRow>
         <TableRow>
           <TableCell variant="head">Taglia corporea</TableCell>
@@ -143,11 +148,15 @@ export function Results(props: Props) {
           <TableCell variant="head">
             Metabolismo basale (Harris-Benedict)
           </TableCell>
-          <TableCell align="right">{cutDecimals(metabolismoBasaleHarrisBenedict)}</TableCell>
+          <TableCell align="right">
+            {cutDecimals(metabolismoBasaleHarrisBenedict)}
+          </TableCell>
         </TableRow>
         <TableRow>
           <TableCell variant="head">Metabolismo basale (Schofield)</TableCell>
-          <TableCell align="right">{cutDecimals(metabolismoBasaleSchofild)}</TableCell>
+          <TableCell align="right">
+            {cutDecimals(metabolismoBasaleSchofild)}
+          </TableCell>
         </TableRow>
         <TableRow>
           <TableCell variant="head">Coefficiente LAF</TableCell>
@@ -164,14 +173,30 @@ export function Results(props: Props) {
           </TableCell>
         </TableRow>
         <TableRow>
-          <TableCell variant="head">Kcal da togliere</TableCell>
-          <TableCell align="right">
-            {kcalDaTogliere ? kcalDaTogliere : 0}
-          </TableCell>
+          <TableCell variant="head">Nota su kcal da togliere</TableCell>
+          <TableCell align="right">{notaKcalDaTogliere}</TableCell>
         </TableRow>
         <TableRow>
           <TableCell variant="head">DE</TableCell>
           <TableCell align="right">{cutDecimals(de)}</TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell variant="head">Kcal da togliere</TableCell>
+          <TableCell align="right">
+            <TextField
+              type="number"
+              variant="outlined"
+              size="small"
+              value={kcalDaTogliere}
+              onChange={(e) => setKcalDaTogliere(parseFloat(e.target.value))}
+            />
+          </TableCell>
+        </TableRow>
+        <TableRow>
+          <TableCell variant="head">Kcal dieta</TableCell>
+          <TableCell align="right">
+            {de - (kcalDaTogliere ? kcalDaTogliere : 0)}
+          </TableCell>
         </TableRow>
       </Table>
       <Button variant="outlined" onClick={props.goBack}>
@@ -376,11 +401,11 @@ function calculateBodyType(gender: Gender, vf: number): BodyType {
     .exhaustive();
 }
 
-function calcoloKcalDaTogliere(
+function calcoloNotaKcalDaTogliere(
   statoCorporeo: StatoCorporeo
 ): string | undefined {
   const x: string | undefined = match(statoCorporeo)
-    .with(StatoCorporeo.Sottopeso, StatoCorporeo.Normopeso, () => undefined)
+    .with(StatoCorporeo.Sottopeso, StatoCorporeo.Normopeso, () => "0")
     .with(StatoCorporeo.Sovrappeso, () => "Max 500")
     .with(
       StatoCorporeo.Obesità1Grado,
